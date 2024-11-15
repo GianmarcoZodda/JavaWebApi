@@ -24,12 +24,19 @@ public class ProductoController extends HttpServlet{
 	protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		
 		Long idL = Long.parseLong(req.getParameter("id"));
-
-		super.doGet(req, res);
+		System.out.println("el id es: "+idL);
 		
 		ProductoDTO productoDTO = productoService.getById(idL);
 		
-		res.getWriter().print(productoDTO.toString());
+		//propio de los Servlet, para escribir en el reponse
+				//resp.getWriter().print(productoDto.toString());
+				
+				//guarda en la sesion el objeto de la DB
+				//se guarda con Object
+				req.getSession().setAttribute("PRODUCTO", productoDTO);
+				
+				//redirect
+				getServletContext().getRequestDispatcher("/datos.jsp").forward(req, res);
 	}
 	
 }

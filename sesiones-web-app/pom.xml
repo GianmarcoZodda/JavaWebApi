@@ -46,9 +46,19 @@
 	    <version>0.0.1-SNAPSHOT</version>
 	</dependency>
 	
+	<!--  
 	<dependency>
 	    <groupId>JavaWebApi</groupId>
 	    <artifactId>app-repository</artifactId>
+	    <version>0.0.1-SNAPSHOT</version>
+	</dependency>
+	-->
+	
+	<!-- cliente soap -->
+	<!--librerias propias-->
+	<dependency>
+		<groupId>JavaWebApi</groupId>
+	    <artifactId>soap-app-client</artifactId>
 	    <version>0.0.1-SNAPSHOT</version>
 	</dependency>
 

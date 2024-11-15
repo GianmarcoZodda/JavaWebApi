@@ -7,7 +7,7 @@ public class ProductoRepositoryMysqlImp implements ProductoRepository{
 
 	@Override
 	public ProductoDTO getById(Long id) {
-		String sql = "SELECT * from Productoa where id="+id;
+		String sql = "SELECT * from Producto where id="+id;
 		System.out.println(sql);
 		
 		//simulo el product

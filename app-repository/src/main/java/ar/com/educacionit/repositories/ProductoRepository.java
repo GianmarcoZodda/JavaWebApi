@@ -1,5 +1,7 @@
 package ar.com.educacionit.repositories;
 
+import java.util.List;
+
 import ar.com.educacionit.repository.dtos.ProductoDTO;
 
 public interface ProductoRepository {
@@ -7,10 +9,14 @@ public interface ProductoRepository {
 	
 	public ProductoDTO getById(Long id);
 	
-	public void saveProductoDTO(ProductoDTO producto);
+	public ProductoDTO save(ProductoDTO producto);
 	
-	public ProductoDTO updateProductoDTO(ProductoDTO productoDTO);
+	public void update(ProductoDTO productoDTO);
 	
-	public ProductoDTO deleteProductoDTO(Long id);
+	public void delete(Long id);
+	
+	public List<ProductoDTO> findAll();
+
+	public ProductoDTO getByCodigo(String codigo);
 
 }

@@ -1,41 +1,133 @@
 package ar.com.educacionit.repositories.implementations;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.query.Query;
+
+import ar.com.educacionit.domain.Producto;
+import ar.com.educacionit.hibernate.HibernateUtils;
 import ar.com.educacionit.repositories.ProductoRepository;
+import ar.com.educacionit.repositories.exceptions.DBConnectionException;
 import ar.com.educacionit.repository.dtos.ProductoDTO;
 
 public class ProductoRepositoryMysqlImp implements ProductoRepository{
-
-	@Override
-	public ProductoDTO getById(Long id) {
-		String sql = "SELECT * from Producto where id="+id;
-		System.out.println(sql);
+	
+	
+	//implementar todos los metodos de la interface
+		private SessionFactory factory;
 		
-		//simulo el product
-		Long _id = id;
-		String titulo = "producto de la db";
-		Double precio = 1500.75d;
+		public ProductoRepositoryMysqlImp() {
+			this.factory = HibernateUtils.getSessionFactory();//recien aca se crea la conexion(y todo lo necesario) a la base
+		}
 		
-		return new ProductoDTO(_id, titulo, precio);
-	}
+		@Override
+		public ProductoDTO save(ProductoDTO dto) {//sin id
+			//insert into tabla (c1,c2....) values(v1,v2...vn)
+			Session session = this.factory.getCurrentSession();
+			session.beginTransaction();
+			
+			//DTO > Dominio
+			Producto nuevoProducto = new Producto(dto.getTitulo(), dto.getCodigo(), dto.getPrecio());//ctrlshift+i
+			session.persist(nuevoProducto);
+			session.getTransaction().commit();
+			session.close();
+			
+			dto.setId(nuevoProducto.getId());
+			return dto;
+		}
 
-	@Override
-	public void saveProductoDTO(ProductoDTO producto) {
-		// TODO Auto-generated method stub
-		
-	}
+		@Override
+		public ProductoDTO getById(Long id) {
+			//usar hibernate para consultar a la db y que nos retorne un objeto Producto
+			Session session = null;
+			try {
+				session = factory.getCurrentSession();
+				session.beginTransaction();
+				Producto producto = session.get(Producto.class, id);
+				
+				ProductoDTO dto = new ProductoDTO(producto.getId(),producto.getTitulo(),producto.getPrecio());
+				dto.setCodigo(producto.getCodigo());
+				return dto;
+			}catch(HibernateException e) {
+				// session.getTransaction().rollback();
+				throw new DBConnectionException(e.getMessage(),e.getCause());
+			}finally {
+				// session.getTransaction().commit();
+				session.close();
+			}
+		}
 
-	@Override
-	public ProductoDTO updateProductoDTO(ProductoDTO productoDTO) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+		@Override
+		public void update(ProductoDTO dto) {
+			Session session = this.factory.getCurrentSession();
+			session.getTransaction().begin();
+			Producto producto = session.get(Producto.class, dto.getId());
 
-	@Override
-	public ProductoDTO deleteProductoDTO(Long id) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+			//actualizamos
+			producto.setPrecio(dto.getPrecio());
+			producto.setTitulo(dto.getTitulo());
+			//y mas campo
+			
+			session.persist(producto);//TODO: VER PORQUE NO ACTUALIZA
+			session.getTransaction().commit();
+			session.close();
+		}
 
+		@Override
+		public void delete(Long id) {
+			Session session = this.factory.getCurrentSession();
+			session.getTransaction().begin();
+			
+			Producto producto = session.get(Producto.class, id);
+			
+			//delete from tabla where id = 1
+			
+			session.remove(producto);
+			session.getTransaction().commit();
+			session.close();
+		}
+
+		@Override
+		public List<ProductoDTO> findAll() {
+			//escribiendo query / consultas usando hibernate
+			//sql > select * from tabla where campo = valor...
+			
+			Session session = this.factory.getCurrentSession();
+			session.getTransaction().begin();
+			String hql = "Select p from " + Producto.class.getName() + " p";
+			Query<Producto> query = session.createQuery(hql, Producto.class); // TODO: ver que metodo usar
+			
+			List<Producto> productos = query.getResultList();
+			
+			//aplica lambdas
+			return productos.stream()
+				.map(p -> new ProductoDTO(p.getId(), p.getTitulo(), p.getPrecio()))
+				.collect(Collectors.toList());		
+		}
+
+		@Override
+		public ProductoDTO getByCodigo(String codigo) {
+			
+			Session session = this.factory.getCurrentSession();
+			session.getTransaction().begin();
+			String hql = "select p from " + Producto.class.getName() + " p where p.codigo=:codigo";
+			Query<Producto> query = session.createQuery(hql, Producto.class);
+			query.setParameter("codigo", codigo);
+			Producto p = query.uniqueResult();//objeto o nulo
+			
+			session.close();
+			
+			if(p != null) {
+				ProductoDTO dto = new ProductoDTO(p.getId(), p.getTitulo(), p.getPrecio());
+				dto.setCodigo(p.getCodigo());
+				return dto;
+			}
+			return null;
+		}
 
 
 }

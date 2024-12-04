@@ -4,8 +4,12 @@ public class ProductoDTO {
 	
 	private Long id;
 	private String titulo;
+	private String codigo;
 	private Double precio;
 
+	public ProductoDTO() {
+		
+	}
 	
 	public ProductoDTO(Long id, String titulo, Double precio) {
 		this.setId(id);
@@ -14,7 +18,11 @@ public class ProductoDTO {
 	}
 	
 	
-	private void setId(Long id) {
+	public void setId(Long id) {
+		if(id == null || id < 0) {
+			throw new IllegalArgumentException("Id no puede ser nulo ni < 0");//runtime
+		}
+		//al final todo ok 
 		this.id = id;
 	}
 	private void setTitulo(String titulo) {
@@ -22,6 +30,10 @@ public class ProductoDTO {
 	}
 	private void setPrecio(Double precio) {
 		this.precio = precio;
+	}
+	
+	public void setCodigo(String codigo) {
+		this.codigo = codigo;
 	}
 
 
@@ -32,6 +44,10 @@ public class ProductoDTO {
 
 	public String getTitulo() {
 		return titulo;
+	}
+	
+	public String getCodigo() {
+		return this.codigo;
 	}
 
 
